@@ -323,11 +323,11 @@ abstract final class SeedButton {
   static const double pressTranslateY = ${b.pressTranslateY};
   static const double borderWidth = ${b.borderWidth};
 
-  static const Map<String, SeedButtonSize> sizes = <String, SeedButtonSize>{
+  static const Map<String, SeedButtonSize> sizes = {
 ${sizes}
   };
 
-  static const Map<String, SeedButtonVariant> variants = <String, SeedButtonVariant>{
+  static const Map<String, SeedButtonVariant> variants = {
 ${variants}
   };
 }
