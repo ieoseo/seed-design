@@ -211,11 +211,13 @@ export type SeedIconName = keyof typeof seedIcons;
 `;
 }
 
-// ── SVG 복사 ──────────────────────────────────────────────
+// ── 에셋 복사 (svg + png) ─────────────────────────────────
 function copySvgs(srcDir, outDir) {
   mkdirSync(outDir, { recursive: true });
   for (const f of readdirSync(join(ROOT, srcDir))) {
-    if (f.endsWith(".svg")) copyFileSync(join(ROOT, srcDir, f), join(outDir, basename(f)));
+    if (f.endsWith(".svg") || f.endsWith(".png")) {
+      copyFileSync(join(ROOT, srcDir, f), join(outDir, basename(f)));
+    }
   }
 }
 
