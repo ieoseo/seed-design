@@ -1,0 +1,19 @@
+{
+  "name": "@ieoseo/seed-design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "이어서(ieoseo) 공유 디자인 프리미티브 — 토큰·아이콘 단일 소스 → Flutter(Dart)·웹(CSS/TS) 자동 생성",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs && git diff --exit-code dist || (echo 'dist 가 소스와 어긋남 — npm run build 후 커밋' && exit 1)"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "tokens",
+    "icons",
+    "dist"
+  ]
+}

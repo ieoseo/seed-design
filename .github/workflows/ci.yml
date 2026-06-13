@@ -1,0 +1,24 @@
+name: ci
+
+# 소스(tokens/icons)를 바꾸면 dist 도 재생성해 커밋해야 한다.
+# 이 CI 는 dist 가 소스와 일치하는지(=커밋 누락 없는지) 검증한다.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 생성기 실행 후 dist 일치 확인
+        run: |
+          node scripts/build.mjs
+          git diff --exit-code dist || {
+            echo "::error::dist 가 소스와 어긋남 — 로컬에서 'npm run build' 후 dist 를 커밋하세요.";
+            exit 1;
+          }
