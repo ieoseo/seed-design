@@ -1,0 +1,28 @@
+/* GENERATED — do not edit. Source: tokens/tokens.json components (run `npm run build`). */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.0096em;
+  line-height: 1;
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--duration-instant) var(--ease-production), transform var(--duration-instant) var(--ease-production);
+}
+.btn:active { transform: translateY(1px); }
+.btn-full { width: 100%; }
+.btn-sm { height: 40px; padding: 0 14px; font-size: 13px; border-radius: 10px; gap: 6px; }
+.btn-md { height: 50px; padding: 0 18px; font-size: 15px; border-radius: 14px; gap: 7px; }
+.btn-lg { height: 56px; padding: 0 22px; font-size: 16px; border-radius: 16px; gap: 8px; }
+.btn-primary { background: var(--primary); color: #FFFFFF; border-color: transparent; }
+.btn-neutral { background: var(--fg); color: var(--bg); border-color: transparent; }
+.btn-outline { background: transparent; color: var(--fg); border-color: var(--border); }
+.btn-subtle { background: var(--primary-subtle); color: var(--primary); border-color: transparent; }
+.btn-ghost { background: transparent; color: var(--fg-muted); border-color: transparent; }
+.btn-danger { background: var(--danger-subtle); color: var(--danger); border-color: transparent; }
+.btn-primary:hover { background: var(--primary-hover); }
