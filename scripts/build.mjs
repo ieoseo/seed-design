@@ -211,6 +211,30 @@ export type SeedIconName = keyof typeof seedIcons;
 `;
 }
 
+// ── 4) 프로바이더 글리프 (Web) ────────────────────────────
+// provider/*.svg 의 viewBox + 내부 마크업을 TS 로 내보내 웹이 inline 렌더한다
+// (apple 은 fill=currentColor 상속, google/google-play 는 멀티컬러). kakao 는 png 라 제외.
+function buildProviders() {
+  const dir = "icons/provider";
+  const out = {};
+  for (const f of readdirSync(join(ROOT, dir)).sort()) {
+    if (!f.endsWith(".svg")) continue;
+    const svg = read(join(dir, f));
+    const viewBox = (svg.match(/viewBox="([^"]+)"/) || [])[1] || "0 0 24 24";
+    const inner = svg
+      .replace(/^[\s\S]*?<svg[^>]*>/, "")
+      .replace(/<\/svg>[\s\S]*$/, "")
+      .trim();
+    out[f.replace(".svg", "")] = { viewBox, inner };
+  }
+  return `// GENERATED — do not edit. Source: icons/provider/*.svg (run \`npm run build\`).
+// 프로바이더 로고 — viewBox + inner SVG 마크업. 웹에서 <svg dangerouslySetInnerHTML> 로 렌더.
+export const seedProviders: Record<string, { viewBox: string; inner: string }> = ${JSON.stringify(out, null, 2)};
+
+export type SeedProviderName = keyof typeof seedProviders;
+`;
+}
+
 // ── 에셋 복사 (svg + png) ─────────────────────────────────
 function copySvgs(srcDir, outDir) {
   mkdirSync(outDir, { recursive: true });
@@ -231,6 +255,7 @@ writeFileSync(join(DIST, "css", "tokens.css"), buildCss());
 writeFileSync(join(DIST, "dart", "seed_tokens.dart"), buildDart());
 writeFileSync(join(DIST, "dart", "seed_icons.dart"), buildIconsDart());
 writeFileSync(join(DIST, "web", "icons.ts"), buildIconsTs());
+writeFileSync(join(DIST, "web", "providers.ts"), buildProviders());
 copySvgs("icons/brand", join(DIST, "svg", "brand"));
 copySvgs("icons/provider", join(DIST, "svg", "provider"));
 
