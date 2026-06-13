@@ -44,6 +44,12 @@ function mix(aHex, bHex, pct) {
   };
 }
 const camelToKebab = (s) => s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+// 컴포넌트 색 키 → CSS. scheme 키는 var(--token), '#hex' 는 리터럴, 'transparent' 는 그대로.
+function cssColor(key) {
+  if (key === "transparent") return "transparent";
+  if (key.startsWith("#")) return toCss(parseHex(key));
+  return `var(--${camelToKebab(key)})`;
+}
 
 // ── 소스 로드 ──────────────────────────────────────────────
 const T = readJson("tokens/tokens.json");
@@ -235,6 +241,99 @@ export type SeedProviderName = keyof typeof seedProviders;
 `;
 }
 
+// ── 5) 컴포넌트 스펙 (버튼) → CSS + Dart ──────────────────
+// 단일 소스 components.button → 웹 .btn 클래스 / Flutter SeedButton 스펙.
+function buildComponentsCss() {
+  const b = T.components.button;
+  const L = [];
+  L.push(".btn {");
+  L.push("  display: inline-flex;");
+  L.push("  align-items: center;");
+  L.push("  justify-content: center;");
+  L.push("  font-family: var(--font-sans), sans-serif;");
+  L.push(`  font-weight: ${b.weight};`);
+  L.push(`  letter-spacing: ${b.letterSpacingEm}em;`);
+  L.push("  line-height: 1;");
+  L.push("  border-style: solid;");
+  L.push(`  border-width: ${b.borderWidth}px;`);
+  L.push("  border-color: transparent;");
+  L.push("  cursor: pointer;");
+  L.push("  white-space: nowrap;");
+  L.push("  transition: background var(--duration-instant) var(--ease-production), transform var(--duration-instant) var(--ease-production);");
+  L.push("}");
+  L.push(`.btn:active { transform: translateY(${b.pressTranslateY}px); }`);
+  L.push(".btn-full { width: 100%; }");
+  for (const [name, s] of Object.entries(b.sizes)) {
+    L.push(`.btn-${name} { height: ${s.height}px; padding: 0 ${s.padX}px; font-size: ${s.fontSize}px; border-radius: ${s.radius}px; gap: ${s.gap}px; }`);
+  }
+  for (const [name, v] of Object.entries(b.variants)) {
+    L.push(`.btn-${name} { background: ${cssColor(v.bg)}; color: ${cssColor(v.fg)}; border-color: ${cssColor(v.border)}; }`);
+  }
+  L.push(".btn-primary:hover { background: var(--primary-hover); }");
+  return [
+    "/* GENERATED — do not edit. Source: tokens/tokens.json components (run `npm run build`). */",
+    L.join("\n"),
+    "",
+  ].join("\n");
+}
+
+function buildComponentsDart() {
+  const b = T.components.button;
+  const sizes = Object.entries(b.sizes)
+    .map(([n, s]) => `    '${n}': SeedButtonSize(${s.height}, ${s.padX}, ${s.padY}, ${s.fontSize}, ${s.radius}, ${s.gap}),`)
+    .join("\n");
+  const variants = Object.entries(b.variants)
+    .map(([n, v]) => `    '${n}': SeedButtonVariant('${v.bg}', '${v.fg}', '${v.border}'),`)
+    .join("\n");
+  return `// GENERATED — do not edit. Source: tokens/tokens.json components (run \`npm run build\`).
+import 'package:flutter/widgets.dart';
+
+/// 버튼 사이즈 수치(플랫폼 중립). client DkButton 의 \`_SizeSpec\` 출처.
+@immutable
+class SeedButtonSize {
+  const SeedButtonSize(
+    this.height,
+    this.padX,
+    this.padY,
+    this.fontSize,
+    this.radius,
+    this.gap,
+  );
+  final double height;
+  final double padX;
+  final double padY;
+  final double fontSize;
+  final double radius;
+  final double gap;
+}
+
+/// 변형별 색 키. scheme 키('primary'·'fg'…) / '#RRGGBB' 리터럴 / 'transparent'.
+@immutable
+class SeedButtonVariant {
+  const SeedButtonVariant(this.bg, this.fg, this.border);
+  final String bg;
+  final String fg;
+  final String border;
+}
+
+/// 버튼 컴포넌트 스펙(단일 소스). 앱·웹이 같은 수치/변형을 공유한다.
+abstract final class SeedButton {
+  static const int weight = ${b.weight};
+  static const double letterSpacingEm = ${b.letterSpacingEm};
+  static const double pressTranslateY = ${b.pressTranslateY};
+  static const double borderWidth = ${b.borderWidth};
+
+  static const Map<String, SeedButtonSize> sizes = <String, SeedButtonSize>{
+${sizes}
+  };
+
+  static const Map<String, SeedButtonVariant> variants = <String, SeedButtonVariant>{
+${variants}
+  };
+}
+`;
+}
+
 // ── 에셋 복사 (svg + png) ─────────────────────────────────
 function copySvgs(srcDir, outDir) {
   mkdirSync(outDir, { recursive: true });
@@ -256,9 +355,12 @@ writeFileSync(join(DIST, "dart", "seed_tokens.dart"), buildDart());
 writeFileSync(join(DIST, "dart", "seed_icons.dart"), buildIconsDart());
 writeFileSync(join(DIST, "web", "icons.ts"), buildIconsTs());
 writeFileSync(join(DIST, "web", "providers.ts"), buildProviders());
+writeFileSync(join(DIST, "css", "components.css"), buildComponentsCss());
+writeFileSync(join(DIST, "dart", "seed_components.dart"), buildComponentsDart());
 copySvgs("icons/brand", join(DIST, "svg", "brand"));
 copySvgs("icons/provider", join(DIST, "svg", "provider"));
 
 console.log("seed-design built → dist/ (css·dart·web·svg)");
 console.log(`  tokens: ${SCHEME_KEYS.length} colors × light/dark, ${Object.keys(T.hue).length} hue`);
 console.log(`  icons:  ${Object.keys(ICONS).length} lucide + brand/provider svg`);
+console.log(`  comps:  button (${Object.keys(T.components.button.sizes).length} sizes × ${Object.keys(T.components.button.variants).length} variants) → css + dart`);
