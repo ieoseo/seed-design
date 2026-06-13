@@ -270,6 +270,26 @@ function buildComponentsCss() {
     L.push(`.btn-${name} { background: ${cssColor(v.bg)}; color: ${cssColor(v.fg)}; border-color: ${cssColor(v.border)}; }`);
   }
   L.push(".btn-primary:hover { background: var(--primary-hover); }");
+
+  // badge
+  const bd = T.components.badge;
+  L.push(`.badge { display: inline-flex; align-items: center; gap: ${bd.gap}px; padding: ${bd.padY}px ${bd.padX}px; border-radius: ${bd.radius}px; font-family: var(--font-sans), sans-serif; font-size: ${bd.fontSize}px; font-weight: ${bd.weight}; letter-spacing: ${bd.letterSpacing}px; line-height: ${bd.lineHeight}; }`);
+  for (const [name, v] of Object.entries(bd.tones)) {
+    L.push(`.badge-${name} { background: ${cssColor(v.bg)}; color: ${cssColor(v.fg)}; }`);
+  }
+
+  // card
+  const cd = T.components.card;
+  L.push(`.card { padding: ${cd.padding}px; border-radius: var(--radius); background: var(--bg); box-shadow: var(--shadow-1); border: 1px solid var(--border-subtle); }`);
+  L.push(`.card-tappable { transition: transform var(--duration-instant) var(--ease-production); }`);
+  L.push(`.card-tappable:active { transform: scale(${cd.pressScale}); }`);
+
+  // segmented
+  const sg = T.components.segmented;
+  L.push(`.seg { display: inline-flex; padding: ${sg.pad}px; background: var(--bg-press); border-radius: ${sg.radius}px; }`);
+  L.push(`.seg-tab { padding: ${sg.tabPadY}px ${sg.tabPadX}px; border-radius: ${sg.thumbRadius}px; font-family: var(--font-sans), sans-serif; font-size: ${sg.fontSize}px; font-weight: ${sg.weight}; color: var(--fg-subtle); cursor: pointer; transition: color var(--duration-transition) var(--ease-production); }`);
+  L.push(`.seg-tab.active { background: var(--bg); box-shadow: var(--shadow-1); color: var(--fg); }`);
+
   return [
     "/* GENERATED — do not edit. Source: tokens/tokens.json components (run `npm run build`). */",
     L.join("\n"),
@@ -284,6 +304,12 @@ function buildComponentsDart() {
     .join("\n");
   const variants = Object.entries(b.variants)
     .map(([n, v]) => `    '${n}': SeedButtonVariant('${v.bg}', '${v.fg}', '${v.border}'),`)
+    .join("\n");
+  const bd = T.components.badge;
+  const cd = T.components.card;
+  const sg = T.components.segmented;
+  const tones = Object.entries(bd.tones)
+    .map(([n, v]) => `    '${n}': SeedTone('${v.bg}', '${v.fg}'),`)
     .join("\n");
   return `// GENERATED — do not edit. Source: tokens/tokens.json components (run \`npm run build\`).
 import 'package:flutter/widgets.dart';
@@ -331,6 +357,50 @@ ${sizes}
 ${variants}
   };
 }
+
+/// 뱃지 톤 = 의미색 쌍(배경/글자 scheme 키).
+@immutable
+class SeedTone {
+  const SeedTone(this.bg, this.fg);
+  final String bg;
+  final String fg;
+}
+
+/// 뱃지 컴포넌트 스펙(단일 소스). client DkBadge 가 소비.
+abstract final class SeedBadge {
+  static const double padX = ${bd.padX};
+  static const double padY = ${bd.padY};
+  static const double radius = ${bd.radius};
+  static const double fontSize = ${bd.fontSize};
+  static const int weight = ${bd.weight};
+  static const double letterSpacing = ${bd.letterSpacing};
+  static const double lineHeight = ${bd.lineHeight};
+  static const double gap = ${bd.gap};
+
+  static const Map<String, SeedTone> tones = {
+${tones}
+  };
+}
+
+/// 카드 컴포넌트 스펙(단일 소스). radius·shadow·border 는 토큰. client DkCard 가 소비.
+abstract final class SeedCard {
+  static const double padding = ${cd.padding};
+  static const double pressScale = ${cd.pressScale};
+  static const int pressDurationMs = ${cd.pressDurationMs};
+}
+
+/// 세그먼트 컨트롤 스펙(단일 소스). client DkSegmented 가 소비.
+abstract final class SeedSegmented {
+  static const double pad = ${sg.pad};
+  static const double radius = ${sg.radius};
+  static const double thumbRadius = ${sg.thumbRadius};
+  static const double tabPadX = ${sg.tabPadX};
+  static const double tabPadY = ${sg.tabPadY};
+  static const double fontSize = ${sg.fontSize};
+  static const int weight = ${sg.weight};
+  static const int thumbDurationMs = ${sg.thumbDurationMs};
+  static const int textDurationMs = ${sg.textDurationMs};
+}
 `;
 }
 
@@ -363,4 +433,4 @@ copySvgs("icons/provider", join(DIST, "svg", "provider"));
 console.log("seed-design built → dist/ (css·dart·web·svg)");
 console.log(`  tokens: ${SCHEME_KEYS.length} colors × light/dark, ${Object.keys(T.hue).length} hue`);
 console.log(`  icons:  ${Object.keys(ICONS).length} lucide + brand/provider svg`);
-console.log(`  comps:  button (${Object.keys(T.components.button.sizes).length} sizes × ${Object.keys(T.components.button.variants).length} variants) → css + dart`);
+console.log(`  comps:  ${Object.keys(T.components).filter((k) => !k.startsWith("$")).length - 0} (button/badge/card/segmented) → css + dart`);

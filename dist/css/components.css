@@ -26,3 +26,17 @@
 .btn-ghost { background: transparent; color: var(--fg-muted); border-color: transparent; }
 .btn-danger { background: var(--danger-subtle); color: var(--danger); border-color: transparent; }
 .btn-primary:hover { background: var(--primary-hover); }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 8px; font-family: var(--font-sans), sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12px; line-height: 1.5; }
+.badge-neutral { background: var(--bg-press); color: var(--fg-muted); }
+.badge-primary { background: var(--primary-subtle); color: var(--primary); }
+.badge-success { background: var(--success-subtle); color: var(--success-fg); }
+.badge-warning { background: var(--warning-subtle); color: var(--warning-fg); }
+.badge-danger { background: var(--danger-subtle); color: var(--danger); }
+.badge-info { background: var(--info-subtle); color: var(--info-fg); }
+.badge-violet { background: var(--violet-subtle); color: var(--violet-fg); }
+.card { padding: 18px; border-radius: var(--radius); background: var(--bg); box-shadow: var(--shadow-1); border: 1px solid var(--border-subtle); }
+.card-tappable { transition: transform var(--duration-instant) var(--ease-production); }
+.card-tappable:active { transform: scale(0.985); }
+.seg { display: inline-flex; padding: 3px; background: var(--bg-press); border-radius: 12px; }
+.seg-tab { padding: 8px 14px; border-radius: 9px; font-family: var(--font-sans), sans-serif; font-size: 14px; font-weight: 600; color: var(--fg-subtle); cursor: pointer; transition: color var(--duration-transition) var(--ease-production); }
+.seg-tab.active { background: var(--bg); box-shadow: var(--shadow-1); color: var(--fg); }
