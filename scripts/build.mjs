@@ -290,6 +290,11 @@ function buildComponentsCss() {
   L.push(`.seg-tab { padding: ${sg.tabPadY}px ${sg.tabPadX}px; border-radius: ${sg.thumbRadius}px; font-family: var(--font-sans), sans-serif; font-size: ${sg.fontSize}px; font-weight: ${sg.weight}; color: var(--fg-subtle); cursor: pointer; transition: color var(--duration-transition) var(--ease-production); }`);
   L.push(`.seg-tab.active { background: var(--bg); box-shadow: var(--shadow-1); color: var(--fg); }`);
 
+  // chip (선택 칩)
+  const cp = T.components.chip;
+  L.push(`.chip { display: inline-flex; align-items: center; gap: ${cp.gap}px; padding: ${cp.padY}px ${cp.padX}px; border-radius: ${cp.radius}px; border: ${cp.borderWidth}px solid ${cssColor(cp.off.border)}; background: ${cssColor(cp.off.bg)}; color: ${cssColor(cp.off.fg)}; font-family: var(--font-sans), sans-serif; font-size: ${cp.fontSize}px; font-weight: ${cp.weight}; cursor: pointer; transition: background var(--duration-instant) var(--ease-production), border-color var(--duration-instant) var(--ease-production); }`);
+  L.push(`.chip.on { background: ${cssColor(cp.on.bg)}; color: ${cssColor(cp.on.fg)}; border-color: ${cssColor(cp.on.border)}; }`);
+
   return [
     "/* GENERATED — do not edit. Source: tokens/tokens.json components (run `npm run build`). */",
     L.join("\n"),
@@ -308,6 +313,7 @@ function buildComponentsDart() {
   const bd = T.components.badge;
   const cd = T.components.card;
   const sg = T.components.segmented;
+  const cp = T.components.chip;
   const tones = Object.entries(bd.tones)
     .map(([n, v]) => `    '${n}': SeedTone('${v.bg}', '${v.fg}'),`)
     .join("\n");
@@ -401,6 +407,27 @@ abstract final class SeedSegmented {
   static const int thumbDurationMs = ${sg.thumbDurationMs};
   static const int textDurationMs = ${sg.textDurationMs};
 }
+
+/// 선택 칩 스펙(단일 소스). on/off 색은 [SeedButtonVariant] 재사용. client DkChoiceChip 소비.
+abstract final class SeedChip {
+  static const double padX = ${cp.padX};
+  static const double padY = ${cp.padY};
+  static const double radius = ${cp.radius};
+  static const double fontSize = ${cp.fontSize};
+  static const int weight = ${cp.weight};
+  static const double borderWidth = ${cp.borderWidth};
+  static const double gap = ${cp.gap};
+  static const SeedButtonVariant on = SeedButtonVariant(
+    '${cp.on.bg}',
+    '${cp.on.fg}',
+    '${cp.on.border}',
+  );
+  static const SeedButtonVariant off = SeedButtonVariant(
+    '${cp.off.bg}',
+    '${cp.off.fg}',
+    '${cp.off.border}',
+  );
+}
 `;
 }
 
@@ -433,4 +460,4 @@ copySvgs("icons/provider", join(DIST, "svg", "provider"));
 console.log("seed-design built → dist/ (css·dart·web·svg)");
 console.log(`  tokens: ${SCHEME_KEYS.length} colors × light/dark, ${Object.keys(T.hue).length} hue`);
 console.log(`  icons:  ${Object.keys(ICONS).length} lucide + brand/provider svg`);
-console.log(`  comps:  ${Object.keys(T.components).filter((k) => !k.startsWith("$")).length - 0} (button/badge/card/segmented) → css + dart`);
+console.log(`  comps:  ${Object.keys(T.components).filter((k) => !k.startsWith("$")).length} (button/badge/card/segmented/chip) → css + dart`);
