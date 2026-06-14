@@ -431,6 +431,21 @@ abstract final class SeedChip {
 `;
 }
 
+// ── 6) 폰트 로딩 소스 (Web) ───────────────────────────────
+// 폰트 CDN URL·버전을 단일 소스로 내보내 landing 이 <link> 로 소비(하드코딩 제거).
+function buildFontsTs() {
+  const f = T.font;
+  const out = {
+    pretendardCss: f.pretendardCss,
+    wantedSansCss: f.wantedSansCss,
+    wantedSansWoff2: f.wantedSansWoff2,
+  };
+  return `// GENERATED — do not edit. Source: tokens/tokens.json font (run \`npm run build\`).
+// 폰트 로딩 단일 소스 — landing layout 이 <link>(preload/stylesheet) 로 소비.
+export const seedFonts = ${JSON.stringify(out, null, 2)} as const;
+`;
+}
+
 // ── 에셋 복사 (svg + png) ─────────────────────────────────
 function copySvgs(srcDir, outDir) {
   mkdirSync(outDir, { recursive: true });
@@ -454,6 +469,7 @@ writeFileSync(join(DIST, "web", "icons.ts"), buildIconsTs());
 writeFileSync(join(DIST, "web", "providers.ts"), buildProviders());
 writeFileSync(join(DIST, "css", "components.css"), buildComponentsCss());
 writeFileSync(join(DIST, "dart", "seed_components.dart"), buildComponentsDart());
+writeFileSync(join(DIST, "web", "fonts.ts"), buildFontsTs());
 copySvgs("icons/brand", join(DIST, "svg", "brand"));
 copySvgs("icons/provider", join(DIST, "svg", "provider"));
 
